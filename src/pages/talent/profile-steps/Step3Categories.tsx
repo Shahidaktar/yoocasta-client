@@ -10,7 +10,6 @@ interface Props {
   isFirstTime: boolean;
 }
 
-// Category-specific attribute fields
 const CATEGORY_ATTRIBUTES: Record<string, { key: string; label: string; type: 'text' | 'select'; options?: string[] }[]> = {
   'Singers': [
     { key: 'singing_language', label: 'Singing Language', type: 'text' },
@@ -44,7 +43,7 @@ const CATEGORY_ATTRIBUTES: Record<string, { key: string; label: string; type: 't
 };
 
 const Step3Categories = ({ options, onSubmit, onBack, loading, existingProfile, isFirstTime }: Props) => {
-    const tp = existingProfile?.talentProfile;
+  const tp = existingProfile?.talentProfile;
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     tp?.categories?.map((c: any) => c.categoryId) || []
@@ -74,8 +73,7 @@ const Step3Categories = ({ options, onSubmit, onBack, loading, existingProfile, 
     }));
   };
 
-  const handleSubmit = () => {
-    // Build attributes array
+  const handleFormSubmit = () => {
     const attributesArray: any[] = [];
     Object.entries(attributes).forEach(([categoryId, attrs]) => {
       Object.entries(attrs).forEach(([key, value]) => {
@@ -87,77 +85,125 @@ const Step3Categories = ({ options, onSubmit, onBack, loading, existingProfile, 
   };
 
   return (
-    <div>
-      <h2>Step 3 — Categories & Skills</h2>
-
-      <div>
-        <label>Select Your Categories</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '10px 0' }}>
-          {options.categories.map((cat: any) => (
-            <div
-              key={cat.id}
-              onClick={() => toggleCategory(cat.id)}
-              style={{
-                padding: '8px 16px',
-                border: '2px solid',
-                borderColor: selectedCategories.includes(cat.id) ? '#333' : '#ddd',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                background: selectedCategories.includes(cat.id) ? '#333' : 'white',
-                color: selectedCategories.includes(cat.id) ? 'white' : '#333',
-              }}
-            >
-              {cat.name}
-            </div>
-          ))}
+    <div className="space-y-12">
+      
+      {/* Structural Segment: Category Selection Grid */}
+      <div className="space-y-6">
+        <h3 className="text-xs font-black tracking-widest text-[#3835A4]/40 uppercase border-b border-[#3835A4]/10 pb-2">
+          01 / Discipline Allocation
+        </h3>
+        
+        <div className="space-y-2">
+          <label className="text-[10px] font-extrabold tracking-widest text-[#3835A4]/40 uppercase block">
+            Select Specializations
+          </label>
+          <div className="flex flex-wrap gap-2.5">
+            {options.categories.map((cat: any) => {
+              const isSelected = selectedCategories.includes(cat.id);
+              return (
+                <button
+                  type="button"
+                  key={cat.id}
+                  onClick={() => toggleCategory(cat.id)}
+                  className={`
+                    px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 uppercase tracking-wider border
+                    ${isSelected 
+                      ? 'bg-[#3835A4] border-[#3835A4] text-white shadow-md shadow-[#3835A4]/20' 
+                      : 'bg-white border-[#3835A4]/10 text-[#3835A4]/50 hover:border-[#3835A4] hover:text-[#3835A4]'
+                    }
+                  `}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Category-specific fields */}
-      {selectedCategories.map(categoryId => {
-        const category = options.categories.find((c: any) => c.id === categoryId);
-        const fields = CATEGORY_ATTRIBUTES[category?.name] || [];
-        if (fields.length === 0) return null;
+      {/* Structural Segment: Dynamic Attribute Sub-Forms */}
+      {selectedCategories.some(id => CATEGORY_ATTRIBUTES[options.categories.find((c: any) => c.id === id)?.name]?.length > 0) && (
+        <div className="space-y-6">
+          <h3 className="text-xs font-black tracking-widest text-[#3835A4]/40 uppercase border-b border-[#3835A4]/10 pb-2">
+            02 / Specialization Parameters
+          </h3>
 
-        return (
-          <div key={categoryId} style={{ border: '1px solid #ddd', padding: '15px', marginTop: '15px', borderRadius: '8px' }}>
-            <h4>{category?.name} — Specific Details</h4>
-            {fields.map(field => (
-              <div key={field.key}>
-                <label>{field.label}</label>
-                {field.type === 'select' ? (
-                  <select
-                    value={attributes[categoryId]?.[field.key] || ''}
-                    onChange={(e) => handleAttributeChange(categoryId, field.key, e.target.value)}
-                  >
-                    <option value="">Select</option>
-                    {field.options?.map(opt => (
-                      <option key={opt} value={opt.toLowerCase()}>{opt}</option>
+          <div className="space-y-8">
+            {selectedCategories.map(categoryId => {
+              const category = options.categories.find((c: any) => c.id === categoryId);
+              const fields = CATEGORY_ATTRIBUTES[category?.name] || [];
+              if (fields.length === 0) return null;
+
+              return (
+                <div 
+                  key={categoryId} 
+                  className="bg-[#3835A4]/5 border border-[#3835A4]/10 rounded-2xl p-6 space-y-6 relative overflow-hidden"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-1 h-3 bg-[#C6007E] rounded-full" />
+                    <h4 className="text-xs font-black uppercase tracking-wider text-[#3835A4]">
+                      {category?.name} Specifications
+                    </h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {fields.map(field => (
+                      <div key={field.key} className="space-y-1.5 group">
+                        <label className="text-[10px] font-extrabold tracking-widest text-[#3835A4]/40 group-focus-within:text-[#3835A4] uppercase transition-colors duration-200">
+                          {field.label}
+                        </label>
+                        
+                        {field.type === 'select' ? (
+                          <select
+                            value={attributes[categoryId]?.[field.key] || ''}
+                            onChange={(e) => handleAttributeChange(categoryId, field.key, e.target.value)}
+                            className="w-full bg-transparent border-b-2 border-[#3835A4]/10 focus:border-[#3835A4] py-2 text-sm font-medium text-[#3835A4] outline-none transition-all duration-200 cursor-pointer appearance-none"
+                          >
+                            <option value="">Select Option</option>
+                            {field.options?.map(opt => (
+                              <option key={opt} value={opt.toLowerCase()}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value={attributes[categoryId]?.[field.key] || ''}
+                            onChange={(e) => handleAttributeChange(categoryId, field.key, e.target.value)}
+                            placeholder={`Enter ${field.label.toLowerCase()}`}
+                            className="w-full bg-transparent border-b-2 border-[#3835A4]/10 focus:border-[#3835A4] py-2.5 text-sm font-medium text-[#3835A4] placeholder-[#3835A4]/20 outline-none transition-all duration-200"
+                          />
+                        )}
+                      </div>
                     ))}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={attributes[categoryId]?.[field.key] || ''}
-                    onChange={(e) => handleAttributeChange(categoryId, field.key, e.target.value)}
-                  />
-                )}
-              </div>
-            ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </div>
+      )}
 
-      <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-        <button type="button" onClick={onBack}>← Back</button>
+      {/* Persistent Control Hub Structure */}
+      <div className="pt-6 border-t border-[#3835A4]/10 flex items-center justify-between gap-4">
+        <button 
+          type="button" 
+          onClick={onBack}
+          className="group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#3835A4]/40 hover:text-[#3835A4] transition-colors duration-200 py-3"
+        >
+          <span className="transition-transform group-hover:-translate-x-1 duration-150">←</span> 
+          Back
+        </button>
+
         <button
           type="button"
-          onClick={handleSubmit}
+          onClick={handleFormSubmit}
           disabled={loading || selectedCategories.length === 0}
+          className="bg-[#3835A4] hover:bg-[#2a2780] disabled:bg-[#3835A4]/20 text-white disabled:text-white/40 font-black text-[10px] tracking-widest uppercase px-10 py-4 rounded-xl transition-all duration-200 active:scale-[0.99] disabled:pointer-events-none inline-flex items-center gap-3 shadow-lg shadow-[#3835A4]/20"
         >
-          {loading ? 'Saving...' : isFirstTime ? 'Save & Next →' : 'Save Changes'}
+          {loading ? 'Preserving Fields...' : isFirstTime ? 'Save & Progress →' : 'Commit Changes'}
         </button>
       </div>
+
     </div>
   );
 };

@@ -42,51 +42,215 @@ const SignupRecruiter = () => {
       setAuth(user, accessToken, refreshToken);
       navigate('/verify-email-otp');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const data = err.response?.data;
+      if (data?.errors && Array.isArray(data.errors)) {
+        const specificErrors = data.errors.map((e: any) => e.msg).join(' | ');
+        setError(`${data.message}: ${specificErrors}`);
+      } else {
+        setError(data?.message || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Sign Up as Recruiter</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label>Company Name</label>
-          <input {...register('companyName')} />
-          {errors.companyName && <p style={{ color: 'red' }}>{errors.companyName.message}</p>}
+    <div className="w-full min-h-screen bg-white text-neutral-900 grid lg:grid-cols-12 font-sans selection:bg-purple-600 selection:text-white relative">
+      
+      {/* LEFT ASPECT: Full Screen Clean Form Matrix */}
+      <div className="lg:col-span-7 p-8 md:p-16 lg:p-24 flex flex-col justify-start bg-white relative order-2 lg:order-1">
+        <div className="w-full max-w-2xl mx-auto space-y-8">
+          
+          {/* Section Title */}
+          <div>
+            <h2 className="text-sm font-black tracking-[0.25em] uppercase text-neutral-950">
+              Recruiter Initialization
+            </h2>
+            <p className="text-xs text-neutral-400 font-light mt-1">
+              Please populate all modules with valid corporate credentials.
+            </p>
+          </div>
+
+          {/* Error Callout */}
+          {error && (
+            <div className="p-3 rounded-xl bg-red-50/60 border border-red-100 text-red-600 text-xs font-semibold flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            
+            {/* Corporate Grid Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Company Name Input */}
+              <div className="space-y-1.5 relative group">
+                <label className="text-[10px] font-extrabold text-neutral-400 group-focus-within:text-neutral-950 tracking-widest uppercase transition-colors duration-200">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  {...register('companyName')}
+                  placeholder="e.g. Acme Corp"
+                  className={`w-full bg-transparent border-b-2 ${errors.companyName ? 'border-red-400 focus:border-red-500' : 'border-neutral-100 focus:border-neutral-950'} py-2.5 text-sm text-neutral-900 placeholder-neutral-200 outline-none transition-all duration-200 font-medium`}
+                />
+                {errors.companyName && (
+                  <p className="text-xs text-red-500 font-medium pt-1">{errors.companyName.message}</p>
+                )}
+              </div>
+
+              {/* Contact Person Input */}
+              <div className="space-y-1.5 relative group">
+                <label className="text-[10px] font-extrabold text-neutral-400 group-focus-within:text-neutral-950 tracking-widest uppercase transition-colors duration-200">
+                  Contact Person
+                </label>
+                <input
+                  type="text"
+                  {...register('contactPerson')}
+                  placeholder="e.g. Jane Doe"
+                  className={`w-full bg-transparent border-b-2 ${errors.contactPerson ? 'border-red-400 focus:border-red-500' : 'border-neutral-100 focus:border-neutral-950'} py-2.5 text-sm text-neutral-900 placeholder-neutral-200 outline-none transition-all duration-200 font-medium`}
+                />
+                {errors.contactPerson && (
+                  <p className="text-xs text-red-500 font-medium pt-1">{errors.contactPerson.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Email Input Column */}
+            <div className="space-y-1.5 relative group">
+              <label className="text-[10px] font-extrabold text-neutral-400 group-focus-within:text-neutral-950 tracking-widest uppercase transition-colors duration-200">
+                Corporate Email / Identity Node
+              </label>
+              <input
+                type="email"
+                {...register('email')}
+                placeholder="recruitment@company.com"
+                className={`w-full bg-transparent border-b-2 ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-neutral-100 focus:border-neutral-950'} py-2.5 text-sm text-neutral-900 placeholder-neutral-200 outline-none transition-all duration-200 font-medium`}
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500 font-medium pt-1">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Security Passkeys Grid Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Password Input */}
+              <div className="space-y-1.5 relative group">
+                <label className="text-[10px] font-extrabold text-neutral-400 group-focus-within:text-neutral-950 tracking-widest uppercase transition-colors duration-200">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  {...register('password')}
+                  placeholder="••••••••"
+                  className={`w-full bg-transparent border-b-2 ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-neutral-100 focus:border-neutral-950'} py-2.5 text-sm text-neutral-900 placeholder-neutral-200 outline-none transition-all duration-200 font-medium`}
+                />
+                {errors.password && (
+                  <p className="text-xs text-red-500 font-medium pt-1">{errors.password.message}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Input */}
+              <div className="space-y-1.5 relative group">
+                <label className="text-[10px] font-extrabold text-neutral-400 group-focus-within:text-neutral-950 tracking-widest uppercase transition-colors duration-200">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  {...register('confirmPassword')}
+                  placeholder="••••••••"
+                  className={`w-full bg-transparent border-b-2 ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-neutral-100 focus:border-neutral-950'} py-2.5 text-sm text-neutral-900 placeholder-neutral-200 outline-none transition-all duration-200 font-medium`}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-500 font-medium pt-1">{errors.confirmPassword.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Optional Contact Field */}
+            <div className="space-y-1.5 relative group">
+              <label className="text-[10px] font-extrabold text-neutral-400 group-focus-within:text-neutral-950 tracking-widest uppercase transition-colors duration-200">
+                Phone Number <span className="text-neutral-300 lowercase font-normal italic">(optional)</span>
+              </label>
+              <input
+                type="text"
+                {...register('phone')}
+                placeholder="+1 (555) 000-0000"
+                className="w-full bg-transparent border-b-2 border-neutral-100 focus:border-neutral-950 py-2.5 text-sm text-neutral-900 placeholder-neutral-200 outline-none transition-all duration-200 font-medium"
+              />
+            </div>
+
+            {/* Action Row Submit Structure */}
+            <div className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-neutral-950 hover:bg-neutral-900 disabled:bg-neutral-100 text-white disabled:text-neutral-400 font-bold text-xs tracking-widest uppercase px-8 py-4 rounded-xl transition-all duration-200 active:scale-[0.99] disabled:pointer-events-none group inline-flex items-center gap-3"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-3 w-3 text-neutral-400" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Initializing Matrix...
+                  </>
+                ) : (
+                  <>
+                    Complete Registration 
+                    <span className="text-purple-500 transition-transform group-hover:translate-x-1 duration-150">→</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-neutral-400 font-light">Already registered?</span>
+                <Link 
+                  to="/login" 
+                  className="font-bold text-neutral-950 border-b border-neutral-950 pb-0.5 hover:text-purple-600 hover:border-purple-600 transition-all duration-150"
+                >
+                  Sign In
+                </Link>
+              </div>
+
+            </div>
+
+          </form>
+
         </div>
-        <div>
-          <label>Contact Person</label>
-          <input {...register('contactPerson')} />
-          {errors.contactPerson && <p style={{ color: 'red' }}>{errors.contactPerson.message}</p>}
+      </div>
+
+      {/* RIGHT ASPECT: Editorial Cinematic Pillar */}
+      <div className="lg:col-span-5 bg-neutral-50 p-8 md:p-16 lg:p-24 flex flex-col justify-start relative border-t lg:border-t-0 lg:border-l border-neutral-200/70 overflow-hidden min-h-[auto] lg:min-h-screen order-1 lg:order-2">
+        {/* Abstract fine-line background aesthetics */}
+        <div className="absolute top-0 right-0 w-full h-full pointer-events-none opacity-[0.02]">
+          <div className="absolute left-10 top-0 w-px h-full bg-black" />
+          <div className="absolute left-1/2 top-0 w-px h-full bg-black" />
         </div>
-        <div>
-          <label>Email</label>
-          <input type="email" {...register('email')} />
-          {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
+
+        <div className="max-w-sm">
+          {/* Creative Badge Integration */}
+          <div className="inline-flex items-center gap-2 mb-6 bg-white border border-neutral-200 px-3 py-1 rounded-full shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
+            <span className="text-[9px] font-black tracking-[0.2em] uppercase text-neutral-800">
+              Recruiter Hub
+            </span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[0.85] text-neutral-950">
+            ACQUIRE <br />
+            <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600 bg-clip-text text-transparent">
+              THE ELITE
+            </span>
+          </h1>
+          
+          <p className="text-xs text-neutral-400 font-light mt-4 leading-relaxed">
+            Gain executive access to the global engine of high-tier professionals. Deploy your corporate node to source and command world-class capability.
+          </p>
         </div>
-        <div>
-          <label>Password</label>
-          <input type="password" {...register('password')} />
-          {errors.password && <p style={{ color: 'red' }}>{errors.password.message}</p>}
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <input type="password" {...register('confirmPassword')} />
-          {errors.confirmPassword && <p style={{ color: 'red' }}>{errors.confirmPassword.message}</p>}
-        </div>
-        <div>
-          <label>Phone (optional)</label>
-          <input {...register('phone')} />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Creating account...' : 'Sign Up'}
-        </button>
-      </form>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
+      </div>
+
     </div>
   );
 };

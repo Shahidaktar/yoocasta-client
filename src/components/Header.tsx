@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Sparkles, MessageSquare, Plus, Flame, ShieldAlert, CheckCircle2, Menu, X } from 'lucide-react';
+import { Sparkles, MessageSquare, Plus, Flame, ShieldAlert, CheckCircle2, Menu, X, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 interface HeaderProps {
-  onSearchClick: () => void;
-  onPostCastingClick: () => void;
-  onCreateProfileClick: () => void;
-  onPremiumClick: () => void;
-  onLoginClick: () => void;
-  registeredTalentsCount: number;
-  openCastingsCount: number;
+  onSearchClick?: () => void;
+  onPostCastingClick?: () => void;
+  onCreateProfileClick?: () => void;
+  onPremiumClick?: () => void;
+  onLoginClick?: () => void;
+  registeredTalentsCount?: number;
+  openCastingsCount?: number;
 }
 
 export default function Header({
@@ -21,8 +23,18 @@ export default function Header({
   openCastingsCount,
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const { isAuthenticated, user, clearAuth } = useAuthStore();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleLogout = () => {
+    clearAuth();
+    setIsProfileDropdownOpen(false);
+    setIsMenuOpen(false);
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-neutral-200/50 bg-white/90 backdrop-blur-md shadow-sm">
@@ -53,7 +65,7 @@ export default function Header({
         
         {/* Brand Logo - Aligned LEFT on both Desktop and Mobile */}
         <div className="flex items-center z-50">
-          <a href="#" className="flex items-center group">
+          <a href="/" className="flex items-center group">
             <img 
               src={isMenuOpen ? "/logo.png" : "https://pub-9a6daccdd56649a4bb690162026e4c5d.r2.dev/images/logo-black.png"} 
               alt="Yoocasta Logo" 
@@ -68,41 +80,92 @@ export default function Header({
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-600">
-          <a href="#" className="hover:text-[#3835a4] transition-colors">
+          <a href="/browse-talents" className="hover:text-[#3835a4] transition-colors">
             Talent Pool
             <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-[#C6007E] animate-pulse"></span>
           </a>
-          <a href="#" className="hover:text-[#3835a4] transition-colors">
+          <a href="/" className="hover:text-[#3835a4] transition-colors">
             Casting Calls
           </a>
-          <a href="#" className="hover:text-[#3835a4] transition-colors">Our Work</a>
-          <a href="#" className="hover:text-[#3835a4] transition-colors">Success Stories</a>
-          <a href="#" className="hover:text-[#3835a4] transition-colors">FAQ</a>
+          <a href="/" className="hover:text-[#3835a4] transition-colors">Our Work</a>
+          <a href="/" className="hover:text-[#3835a4] transition-colors">Success Stories</a>
+          <a href="/" className="hover:text-[#3835a4] transition-colors">FAQ</a>
         </nav>
 
         {/* Desktop Action Buttons Interface */}
         <div className="hidden md:flex items-center gap-1.5 sm:gap-3">
-          <button
-            onClick={onLoginClick}
-            className="text-xs font-mono tracking-wider font-bold text-neutral-500 hover:text-[#3835a4] px-3 py-2 cursor-pointer transition-colors"
-          >
-            LOG IN
-          </button>
+         
+          {/* <a href="#" className="inline-flex items-center gap-1 rounded-full bg-green-400 px-4 py-2 text-xs font-bold text-white hover:opacity-95 transition-all hover:scale-[1.02] shadow-md shadow-[#3835A4]/25 cursor-pointer">
+            <span>Whatsapp</span>
+          </a> */}
+         
+          {!isAuthenticated ? (
+            <>
+              <Link to="/login" className="text-xs font-mono tracking-wider font-bold text-neutral-500 hover:text-[#3835a4] px-3 py-2 cursor-pointer transition-colors">
+                LOG IN
+              </Link>
+              <Link to="/signup/talent" className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-4 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer">
+                <span>Register</span>
+              </Link>
+            </>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center justify-center h-10 w-10 rounded-full border border-neutral-300 bg-neutral-50 text-neutral-700 hover:bg-neutral-100 transition-all cursor-pointer overflow-hidden"
+              >
+                {user?.image ? (
+                  <img 
+                    src={user.image.startsWith('http') ? user.image : `https://pub-9a6daccdd56649a4bb690162026e4c5d.r2.dev/profile/${user.image}`} 
+                    alt="Profile" 
+                    className="h-full w-full object-cover" 
+                  />
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+              </button>
 
-          <button
-            onClick={onCreateProfileClick}
-            className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-4 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5 text-[#C6007E] shrink-0" />
-            <span>Join Talent</span>
-          </button>
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white border border-neutral-200 shadow-xl py-2 z-50">
+                  {user?.role === 'TALENT' && (
+                    <>
+                      <Link
+                        to="/dashboard/talent"
+                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-[#C6007E] transition-colors"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        Talent Dashboard
+                      </Link>
+                      <Link
+                        to="/dashboard/talent/profile"
+                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-[#C6007E] transition-colors"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                    </>
+                  )}
+                  {user?.role === 'RECRUITER' && (
+                    <Link
+                      to="/dashboard/recruiter"
+                      className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-[#C6007E] transition-colors"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      Recruiter Dashboard
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
-          <button
-            onClick={onPostCastingClick}
-            className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#C6007E] to-[#3835A4] px-4 py-2 text-xs font-bold text-white hover:opacity-95 transition-all hover:scale-[1.02] shadow-md shadow-[#3835A4]/25 cursor-pointer"
-          >
-            <span>Post Casting</span>
-          </button>
+         
         </div>
 
         {/* MOBILE LAYOUT ONLY: Right Side Hamburger Trigger */}
@@ -165,27 +228,68 @@ export default function Header({
 
         {/* Action Buttons Footer */}
         <div className="flex flex-col gap-4 mb-8">
-          <button
-            onClick={() => { toggleMenu(); onPostCastingClick(); }}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#C6007E] to-[#3835A4] py-4 text-sm font-bold text-white shadow-xl transition-all"
+          <a
+            href="#"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-green-400 py-4 text-sm font-bold text-white shadow-xl transition-all"
           >
-            <span>Post Casting</span>
-          </button>
+            <span>Whatsapp</span>
+          </a>
 
-          <button
-            onClick={() => { toggleMenu(); onCreateProfileClick(); }}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white py-4 text-sm font-bold text-[#3835a4] hover:bg-neutral-50 transition-all"
-          >
-            <Plus className="h-4 w-4 text-[#C6007E]" />
-            <span>Join Talent</span>
-          </button>
+          {!isAuthenticated ? (
+            <>
+              <Link
+                to="/signup/talent"
+                onClick={toggleMenu}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white py-4 text-sm font-bold text-[#3835a4] hover:bg-neutral-50 transition-all"
+              >
+                <span>Register</span>
+              </Link>
 
-          <button
-            onClick={() => { toggleMenu(); onLoginClick(); }}
-            className="w-full py-4 text-center text-sm font-mono tracking-wider font-black text-white border-2 border-white/30 hover:border-white hover:bg-white/10 rounded-full transition-all"
-          >
-            LOG IN
-          </button>
+              <Link
+                to="/login"
+                onClick={toggleMenu}
+                className="w-full py-4 text-center text-sm font-mono tracking-wider font-black text-white border-2 border-white/30 hover:border-white hover:bg-white/10 rounded-full transition-all"
+              >
+                LOG IN
+              </Link>
+            </>
+          ) : (
+            <>
+              {user?.role === 'TALENT' && (
+                <>
+                  <Link
+                    to="/dashboard/talent"
+                    onClick={toggleMenu}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white py-4 text-sm font-bold text-[#3835a4] hover:bg-neutral-50 transition-all"
+                  >
+                    Talent Dashboard
+                  </Link>
+                  <Link
+                    to="/dashboard/talent/profile"
+                    onClick={toggleMenu}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white py-4 text-sm font-bold text-[#3835a4] hover:bg-neutral-50 transition-all"
+                  >
+                    Profile
+                  </Link>
+                </>
+              )}
+              {user?.role === 'RECRUITER' && (
+                <Link
+                  to="/dashboard/recruiter"
+                  onClick={toggleMenu}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white py-4 text-sm font-bold text-[#3835a4] hover:bg-neutral-50 transition-all"
+                >
+                  Recruiter Dashboard
+                </Link>
+              )}
+              <button
+                onClick={handleLogout}
+                className="w-full py-4 text-center text-sm font-mono tracking-wider font-black text-red-500 border-2 border-red-500/30 hover:border-red-500 hover:bg-red-500/10 rounded-full transition-all"
+              >
+                LOGOUT
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
