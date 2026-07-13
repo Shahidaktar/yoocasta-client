@@ -114,7 +114,7 @@ const PublicTalentProfile = () => {
                     className="w-full aspect-[4/5] object-cover rounded-[24px] transition-all duration-700 ease-out" 
                   />
                 ) : (
-                  <div className="w-full aspect-[4/5] bg-stone-100 text-stone-400 flex items-center justify-center font-black text-7xl font-mono rounded-[24px]">
+                  <div className="w-full aspect-[4/5] bg-stone-100 text-stone-400 flex items-center justify-center font-black text-7xl font-display rounded-[24px]">
                     {profile.firstName?.[0]}
                   </div>
                 )}
@@ -133,13 +133,13 @@ const PublicTalentProfile = () => {
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                <span className="font-mono text-[10px] font-black tracking-[0.25em] text-[#C6007E] uppercase bg-[#C6007E]/5 px-3 py-1 rounded-md border border-[#C6007E]/20">
+                <span className="font-sans text-[10px] font-black tracking-[0.25em] text-[#C6007E] uppercase bg-[#C6007E]/5 px-3 py-1 rounded-md border border-[#C6007E]/20">
                   {planName} Tier
                 </span>
-                <span className="font-mono text-[10px] font-bold text-stone-400">//@{profile.username}</span>
+                <span className="font-sans text-[10px] font-bold text-stone-400">//@{profile.username}</span>
               </div>
               
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight uppercase leading-[0.95] font-mono text-stone-900">
+              <h1 className="text-4xl sm:text-6xl font-black tracking-tight uppercase leading-[0.95] font-display text-stone-900">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3835A4] via-[#C6007E] to-amber-500">
                   {profile.firstName}
                 </span>
@@ -149,16 +149,16 @@ const PublicTalentProfile = () => {
             {/* QUICK STATS AS A KINETIC GRID */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="bg-white border-2 border-[#3835A4] p-4 rounded-2xl shadow-[4px_4px_0px_0px_#3835A4] flex flex-col justify-between h-24 text-left transform -rotate-1">
-                <span className="text-[8px] font-black tracking-widest text-stone-400 uppercase font-mono">Profile ID</span>
-                <span className="text-sm font-black font-mono text-[#3835A4]">{formatTalentId(profile.id)}</span>
+                <span className="text-[8px] font-black tracking-widest text-stone-400 uppercase font-sans">Profile ID</span>
+                <span className="text-sm font-black font-display text-[#3835A4]">{formatTalentId(profile.id)}</span>
               </div>
               <div className="bg-[#C6007E]/10 border-2 border-[#3835A4] p-4 rounded-2xl shadow-[4px_4px_0px_0px_#3835A4] flex flex-col justify-between h-24 text-left transform rotate-1">
-                <span className="text-[8px] font-black tracking-widest text-[#C6007E] uppercase font-mono">Profile Views</span>
-                <span className="text-xl font-black font-mono text-[#3835A4]">👁 {tp?.views ?? 0}</span>
+                <span className="text-[8px] font-black tracking-widest text-[#C6007E] uppercase font-sans">Profile Views</span>
+                <span className="text-xl font-black font-display text-[#3835A4]">👁 {tp?.views ?? 0}</span>
               </div>
               <div className="col-span-2 sm:col-span-1 bg-white border-2 border-[#3835A4] p-4 rounded-2xl shadow-[4px_4px_0px_0px_#3835A4] flex flex-col justify-between h-24 text-left transform -rotate-1">
-                <span className="text-[8px] font-black tracking-widest text-stone-400 uppercase font-mono">Location</span>
-                <span className="text-xs font-bold text-stone-900 truncate block">
+                <span className="text-[8px] font-black tracking-widest text-stone-400 uppercase font-sans">Location</span>
+                <span className="text-xs font-display text-stone-900 truncate block">
                   {tp?.city?.name ? `${tp.city.name}, ${tp.city.country?.name || ''}` : 'Global Hub'}
                 </span>
               </div>
@@ -166,21 +166,21 @@ const PublicTalentProfile = () => {
 
             {/* CATEGORIES DISPLAYED AS HIGH-CONTRAST CHIPS */}
             <div className="space-y-2 text-left">
-              <span className="block text-[9px] font-black tracking-[0.2em] text-stone-400 uppercase font-mono">Categories</span>
+              <span className="block text-[9px] font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Categories</span>
               <div className="flex flex-wrap gap-2">
                 {tp?.categories?.map((c: any) => (
-                  <span key={c.category.id} className="px-4 py-2 bg-[#3835A4] text-white rounded-xl text-[10px] font-black tracking-widest uppercase border border-[#3835A4] hover:bg-transparent hover:text-[#3835A4] transition-all duration-200">
+                  <span key={c.category.id} className="px-4 py-2 bg-[#3835A4] text-white rounded-xl text-[10px] font-display tracking-widest uppercase border border-[#3835A4] hover:bg-transparent hover:text-[#3835A4] transition-all duration-300">
                     ✦ {c.category.name}
                   </span>
-                )) || <span className="text-xs italic font-mono text-stone-400">Uncategorized Vector</span>}
+                )) || <span className="text-xs italic font-display text-stone-400">Uncategorized Vector</span>}
               </div>
             </div>
 
             {/* NARRATIVE STATEMENT BLOCK */}
             {tp?.bioDescription && (
               <div className="text-left relative border-l-4 border-[#C6007E] pl-6 space-y-2">
-                <span className="text-[9px] font-black tracking-[0.2em] text-stone-400 uppercase font-mono block">About</span>
-                <p className="text-sm text-stone-600 font-medium leading-relaxed whitespace-pre-line max-w-2xl">
+                <span className="text-[9px] font-black tracking-[0.2em] text-stone-400 uppercase font-sans block">About</span>
+                <p className="text-sm text-stone-600 font-display leading-relaxed whitespace-pre-line max-w-2xl">
                   {tp.bioDescription}
                 </p>
               </div>
@@ -194,7 +194,7 @@ const PublicTalentProfile = () => {
           {/* IDENTITY MATRIX GRID */}
           <div className="lg:col-span-7 bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#3835A4] flex flex-col justify-between space-y-6">
             <div className="flex items-center justify-between border-b-2 border-[#3835A4] pb-4">
-              <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-mono">Identity Blueprint</h3>
+              <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-sans">Identity Blueprint</h3>
               {/* <span className="text-stone-300 font-mono text-[10px]">LOG_01 // CODES</span> */}
             </div>
             
@@ -208,8 +208,8 @@ const PublicTalentProfile = () => {
                 { label: 'Dialect Grid', val: tp?.dialects?.map((d: any) => d.dialect.name).join(', ') }
               ].map((item, idx) => (
                 <div key={idx} className="border-b border-stone-200 pb-2">
-                  <span className="block text-[8px] font-black uppercase text-stone-400 font-mono tracking-wider">{item.label}</span>
-                  <span className="text-xs font-black text-stone-900 mt-0.5 block">{item.val || '—'}</span>
+                  <span className="block text-[8px] font-black uppercase text-stone-400 font-sans tracking-wider">{item.label}</span>
+                  <span className="text-xs font-display text-stone-900 mt-0.5 block">{item.val || '—'}</span>
                 </div>
               ))}
             </div>
@@ -217,8 +217,8 @@ const PublicTalentProfile = () => {
             {/* TECHNICAL EXECUTION DESCRIPTION FOOTER */}
             {tp?.skillDescription && (
               <div className="bg-amber-50 border-2 border-dashed border-amber-400/80 p-4 rounded-2xl mt-4">
-                <span className="block text-[8px] font-black uppercase text-amber-600 font-mono tracking-wider mb-1">Capabilities & Special Skills</span>
-                <p className="text-xs font-medium text-amber-900 leading-relaxed">{tp.skillDescription}</p>
+                <span className="block text-[8px] font-black uppercase text-amber-600 font-sans tracking-wider mb-1">Capabilities & Special Skills</span>
+                <p className="text-xs font-display text-amber-900 leading-relaxed">{tp.skillDescription}</p>
               </div>
             )}
           </div>
@@ -226,7 +226,7 @@ const PublicTalentProfile = () => {
           {/* PHYSICAL ARCHITECTURE FRAMEWORK */}
           <div className="lg:col-span-5 bg-[#3835A4] text-stone-100 rounded-[32px] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#C6007E] flex flex-col justify-between space-y-6">
             <div className="flex items-center justify-between border-b border-[#3835A4]/30 pb-4">
-              <h3 className="text-xs font-black tracking-[0.25em] text-[#FFF] uppercase font-mono">Physcial Metrics</h3>
+              <h3 className="text-xs font-black tracking-[0.25em] text-[#FFF] uppercase font-sans">Physcial Metrics</h3>
               {/* <span className="text-white/40 font-mono text-[10px]">SPEC_02</span> */}
             </div>
 
@@ -242,16 +242,16 @@ const PublicTalentProfile = () => {
                 { label: 'Skeletal Build', val: tp?.bodyStructure }
               ].map((item, idx) => (
                 <div key={idx} className="border-b border-white/10 pb-2">
-                  <span className="block text-[8px] font-black uppercase text-white/40 font-mono tracking-wider">{item.label}</span>
-                  <span className="text-xs font-bold text-white mt-0.5 block">{item.val || '—'}</span>
+                  <span className="block text-[8px] font-black uppercase text-white/40 font-sans tracking-wider">{item.label}</span>
+                  <span className="text-xs font-display text-white mt-0.5 block">{item.val || '—'}</span>
                 </div>
               ))}
             </div>
 
             {tp?.tattoo && (
               <div className="pt-2 text-left">
-                <span className="block text-[8px] font-black uppercase text-white/40 font-mono tracking-wider">Dermal Alterations</span>
-                <p className="text-xs text-[#C6007E] font-mono mt-0.5 bg-white px-2 py-0.5 rounded inline-block">{tp.tattoo}</p>
+                <span className="block text-[8px] font-black uppercase text-white/40 font-sans tracking-wider">Dermal Alterations</span>
+                <p className="text-xs text-[#C6007E] font-display mt-0.5 bg-white px-2 py-0.5 rounded inline-block">{tp.tattoo}</p>
               </div>
             )}
           </div>
@@ -262,8 +262,8 @@ const PublicTalentProfile = () => {
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b-2 border-[#3835A4] pb-6 gap-6">
             <div className="space-y-1">
-              <h3 className="text-lg font-black tracking-tight uppercase font-mono text-stone-900">Curated Media Showcase</h3>
-              <p className="text-[10px] font-mono text-stone-400">SELECT STATE CAPTURED ASSETS</p>
+              <h3 className="text-lg font-black tracking-tight uppercase font-sans text-stone-900">Curated Media Showcase</h3>
+              <p className="text-[10px] font-display text-stone-400">SELECT STATE CAPTURED ASSETS</p>
             </div>
             
             {/* Neo-Brutalist Segment Controller */}
@@ -272,7 +272,7 @@ const PublicTalentProfile = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 md:flex-none px-6 py-2.5 text-[10px] font-black tracking-widest uppercase rounded-xl transition-all font-mono ${
+                  className={`flex-1 md:flex-none px-6 py-2.5 text-[10px] font-bold tracking-widest uppercase rounded-xl transition-all font-display ${
                     activeTab === tab
                       ? 'bg-[#3835A4] text-white shadow-md'
                       : 'text-stone-400 hover:text-[#3835A4]'
@@ -289,7 +289,7 @@ const PublicTalentProfile = () => {
             {filterPortfolio(activeTab).length === 0 ? (
               <div className="py-16 col-span-full text-center bg-stone-50 rounded-3xl border-2 border-dashed border-stone-200">
                 <span className="text-2xl block mb-2">🪐</span>
-                <p className="text-xs font-mono text-stone-400 uppercase tracking-wider">
+                <p className="text-xs font-sans text-stone-400 uppercase tracking-wider">
                   No vectors integrated into current registry layer [{activeTab}].
                 </p>
               </div>
@@ -362,16 +362,16 @@ const PublicTalentProfile = () => {
         {tp?.careerHistory && tp.careerHistory.length > 0 && (
           <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-10 shadow-[8px_8px_0px_0px_#3835A4] space-y-8">
             <div className="flex items-center justify-between border-b-2 border-[#3835A4] pb-4">
-              <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-mono">Historical Placement Grid</h3>
-              <span className="text-stone-300 font-mono text-[10px]">CHRONO_TRACK</span>
+              <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-sans">Historical Placement Grid</h3>
+              {/* <span className="text-stone-300 font-mono text-[10px]">CHRONO_TRACK</span> */}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
               {tp.careerHistory.map((ch: any) => (
                 <div key={ch.id} className="bg-[#fdfbf7] border-2 border-[#3835A4] p-6 rounded-2xl relative space-y-2 group transition-transform hover:-translate-y-0.5 hover:bg-white shadow-[4px_4px_0px_0px_#3835A4]">
                   <div className="flex justify-between items-start gap-4">
-                    <h4 className="text-sm font-black tracking-tight text-stone-900 uppercase font-mono">{ch.title}</h4>
-                    <span className="text-[8px] font-mono font-black text-[#C6007E] bg-[#C6007E]/5 border border-[#C6007E]/20 px-2 py-0.5 rounded whitespace-nowrap">
+                    <h4 className="text-sm font-black tracking-tight text-stone-900 uppercase font-display">{ch.title}</h4>
+                    <span className="text-[8px] font-sans font-black text-[#C6007E] bg-[#C6007E]/5 border border-[#C6007E]/20 px-2 py-0.5 rounded whitespace-nowrap">
                       {ch.startDate ? new Date(ch.startDate).toLocaleDateString(undefined, { year: 'numeric' }) : ''} 
                       {ch.endDate ? ` — ${new Date(ch.endDate).toLocaleDateString(undefined, { year: 'numeric' })}` : ' — Pres'}
                     </span>
@@ -393,16 +393,16 @@ const PublicTalentProfile = () => {
             <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 space-y-4 shadow-[6px_6px_0px_0px_#3835A4]">
               <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
                 <span className="text-xl">🎓</span>
-                <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-mono">Academic Matrix & Training</h3>
+                <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Academic Matrix & Training</h3>
               </div>
               <div className="space-y-3">
                 {tp.courses.map((c: any) => (
                   <div key={c.id} className="bg-stone-50 border border-stone-200 p-4 rounded-xl flex justify-between items-center gap-4 hover:border-[#3835A4] transition-colors">
                     <div className="space-y-0.5">
-                      <strong className="block text-xs font-black text-stone-900 font-mono uppercase tracking-wide">{c.title}</strong>
-                      {c.institution && <span className="block text-[10px] font-mono font-bold text-stone-400">{c.institution}</span>}
+                      <strong className="block text-xs font-display text-stone-900  uppercase tracking-wide">{c.title}</strong>
+                      {c.institution && <span className="block text-[10px] font-sans font-bold text-stone-400">{c.institution}</span>}
                     </div>
-                    {c.year && <span className="text-xs font-mono font-black bg-[#3835A4] text-white px-2.5 py-1 rounded-md">{c.year}</span>}
+                    {c.year && <span className="text-xs font-sans font-black bg-[#3835A4] text-white px-2.5 py-1 rounded-md">{c.year}</span>}
                   </div>
                 ))}
               </div>
@@ -414,15 +414,15 @@ const PublicTalentProfile = () => {
             <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 space-y-4 shadow-[6px_6px_0px_0px_#C6007E]">
               <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
                 <span className="text-xl">📋</span>
-                <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-mono">Attributes</h3>
+                <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Attributes</h3>
               </div>
               <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 divide-y divide-stone-200/60 space-y-2.5">
                 {tp.attributes.map((attr: any) => (
                   <div key={attr.id} className="text-xs flex items-center justify-between pt-2.5 first:pt-0">
-                    <span className="font-black tracking-widest text-stone-400 uppercase text-[9px] font-mono">
+                    <span className="font-black tracking-widest text-stone-400 uppercase text-[9px] font-sans">
                       {attr.key.replace(/_/g, ' ')}
                     </span>
-                    <span className="font-black font-mono text-[#3835A4] tracking-tight bg-white px-2 py-0.5 border border-stone-200 rounded">{attr.value}</span>
+                    <span className="font-black font-display text-[#3835A4] tracking-tight bg-white px-2 py-0.5 border border-stone-200 rounded">{attr.value}</span>
                   </div>
                 ))}
               </div>
