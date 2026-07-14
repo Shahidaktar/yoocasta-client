@@ -2,6 +2,136 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPublicProfile } from '../../api/talent.api';
 
+import {
+  FaTheaterMasks,
+  FaVideo,
+  FaFilm,
+  FaMicrophone,
+  FaPaintBrush,
+  FaCamera,
+  FaMusic,
+  IconType,
+} from 'react-icons/fa';
+import { FaPersonDress } from 'react-icons/fa6';
+
+
+const ATTRIBUTE_VALUE_LABELS: Record<string, Record<string, string>> = {
+  makeup_or_hairstylist: {
+    makeup: 'Makeup',
+    hairstlyist: 'Hairstylist', // source typo, normalized here
+    hairstylist: 'Hairstylist',
+    both: 'Both',
+  },
+  voiceover_role_type: {
+    mc: 'MC',
+    rj: 'RJ',
+    vj: 'VJ',
+    voiceover: 'Voiceover',
+    tv_presenter: 'TV Presenter',
+  },
+};
+// Maps each raw attribute key -> { category, subGroup? }
+// subGroup is the sub-heading shown under the category (e.g. "Types of Project").
+// Omit subGroup for keys that render as direct features under the category.
+const KEY_CONFIG: Record<string, { category: string; subGroup?: string }> = {
+  singing_language: { category: 'Singers', subGroup: 'Singing Language' },
+  style_of_songs: { category: 'Singers', subGroup: 'Style of Songs' },
+  singer_individual_or_band: { category: 'Singers' }, // direct feature, no sub-group
+
+  style_of_dance: { category: 'Dancers', subGroup: 'Style of Dance' },
+  dancer_individual_or_band: { category: 'Dancers' },
+
+  camera_worked_on: { category: 'Photographers', subGroup: 'Camera Worked On' },
+  photography_types: { category: 'Photographers', subGroup: 'Types of Project' },
+
+  director_types_of_project: { category: 'Directors', subGroup: 'Types of Project' },
+  director_assistant_level: { category: 'Directors', subGroup: 'Role Level' },
+
+  cinematographer_cameras: { category: 'Cinematographers / Videographers', subGroup: 'Camera Worked On' },
+  cinematographer_project_types: { category: 'Cinematographers / Videographers', subGroup: 'Types of Project' },
+
+  makeup_project_types: { category: 'Makeup & Hairstylists', subGroup: 'Types of Project' },
+  makeup_or_hairstylist: { category: 'Makeup & Hairstylists' },
+
+  voiceover_project_types: { category: 'MC/RJ/VJ/Voice Over', subGroup: 'Types of Project' },
+  voiceover_role_type: { category: 'MC/RJ/VJ/Voice Over' },
+};
+
+const CATEGORY_ICONS_PROFILE: Record<string, IconType> = {
+  'Singers': FaMusic,
+  'Dancers': FaPersonDress,
+  'Photographers': FaCamera,
+  'Directors': FaFilm,
+  'Cinematographers / Videographers': FaVideo,
+  'Makeup & Hairstylists': FaPaintBrush,
+  'MC/RJ/VJ/Voice Over': FaMicrophone,
+};
+const DEFAULT_CATEGORY_ICON_PROFILE: IconType = FaTheaterMasks;
+// Fields where: 0 = not present/not answered, 1 = Individual, >1 = Band/Troupe
+const INDIVIDUAL_OR_GROUP_FIELDS: Record<string, { individual: string; group: string }> = {
+  singer_individual_or_band: { individual: 'Individual', group: 'Band' },
+  dancer_individual_or_band: { individual: 'Individual', group: 'Troupe' },
+};
+
+const humanizeToken = (token: string) =>
+  token
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+const formatAttributeValue = (key: string, rawValue: string): string | null => {
+  if (!rawValue) return null;
+
+  // Special numeric-coded fields: 0 = not present, 1 = Individual, >1 = group
+  const groupConfig = INDIVIDUAL_OR_GROUP_FIELDS[key];
+  if (groupConfig && /^\d+$/.test(rawValue.trim())) {
+    const num = parseInt(rawValue.trim(), 10);
+    if (num === 0) return null; // "0 mean not show (not present)"
+    if (num === 1) return groupConfig.individual;
+    return groupConfig.group; // any value > 1
+  }
+
+  const tokens = rawValue.split(',').map((v) => v.trim()).filter(Boolean);
+  const labelMap = ATTRIBUTE_VALUE_LABELS[key];
+
+  const formatted = tokens.map((token) => {
+    if (labelMap?.[token.toLowerCase()]) return labelMap[token.toLowerCase()];
+    return humanizeToken(token);
+  });
+
+  return formatted.join(', ');
+};
+type FeatureGroups = Record<string,
+  {
+    direct: { key: string; value: string }[]; // features with no subGroup
+    subGroups: Record<string, { key: string; value: string }[]>; // subGroup label -> features
+  }
+>;
+
+const groupAttributesByCategory = (attributes: any[]): FeatureGroups => {
+  const groups: FeatureGroups = {};
+
+  for (const attr of attributes) {
+    const displayValue = formatAttributeValue(attr.key, attr.value);
+    if (displayValue === null) continue;
+
+    const config = KEY_CONFIG[attr.key] || { category: 'Other' };
+    if (!groups[config.category]) groups[config.category] = { direct: [], subGroups: {} };
+
+    const values = displayValue.split(',').map(v => v.trim()).filter(Boolean);
+
+    if (config.subGroup) {
+      if (!groups[config.category].subGroups[config.subGroup]) {
+        groups[config.category].subGroups[config.subGroup] = [];
+      }
+      values.forEach(v => groups[config.category].subGroups[config.subGroup].push({ key: attr.key, value: v }));
+    } else {
+      values.forEach(v => groups[config.category].direct.push({ key: attr.key, value: v }));
+    }
+  }
+
+  return groups;
+};
+
 const PublicTalentProfile = () => {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<any>(null);
@@ -192,36 +322,40 @@ const PublicTalentProfile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
           {/* IDENTITY MATRIX GRID */}
-          <div className="lg:col-span-7 bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#3835A4] flex flex-col justify-between space-y-6">
-            <div className="flex items-center justify-between border-b-2 border-[#3835A4] pb-4">
-              <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-sans">Identity Blueprint</h3>
-              {/* <span className="text-stone-300 font-mono text-[10px]">LOG_01 // CODES</span> */}
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {[
-                { label: 'Calculated Age', val: calculateAge(tp?.dob) },
-                { label: 'Gender Matrix', val: tp?.gender },
-                { label: 'Ethnicity Index', val: tp?.ethnicity?.name },
-                { label: 'Sovereign Nationality', val: profile.nationality?.name },
-                { label: 'Linguistic Tracks', val: tp?.languages?.map((l: any) => l.language.name).join(', ') },
-                { label: 'Dialect Grid', val: tp?.dialects?.map((d: any) => d.dialect.name).join(', ') }
-              ].map((item, idx) => (
-                <div key={idx} className="border-b border-stone-200 pb-2">
-                  <span className="block text-[8px] font-black uppercase text-stone-400 font-sans tracking-wider">{item.label}</span>
-                  <span className="text-xs font-display text-stone-900 mt-0.5 block">{item.val || '—'}</span>
-                </div>
-              ))}
-            </div>
+        <div className="lg:col-span-7 bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#3835A4] flex flex-col justify-between space-y-6">
+  <div className="flex items-center justify-between border-b-2 border-[#3835A4] pb-4">
+    <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-sans">Identity Blueprint</h3>
+  </div>
 
-            {/* TECHNICAL EXECUTION DESCRIPTION FOOTER */}
-            {tp?.skillDescription && (
-              <div className="bg-amber-50 border-2 border-dashed border-amber-400/80 p-4 rounded-2xl mt-4">
-                <span className="block text-[8px] font-black uppercase text-amber-600 font-sans tracking-wider mb-1">Capabilities & Special Skills</span>
-                <p className="text-xs font-display text-amber-900 leading-relaxed">{tp.skillDescription}</p>
-              </div>
-            )}
-          </div>
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+    {[
+      { label: 'Calculated Age', val: calculateAge(tp?.dob) },
+      { label: 'Gender Matrix', val: tp?.gender },
+      { label: 'Ethnicity Index', val: tp?.ethnicity?.name },
+      { label: 'Sovereign Nationality', val: profile.nationality?.name },
+      { label: 'Linguistic Tracks', val: tp?.languages?.map((l: any) => l.language.name).join(', ') },
+      { label: 'Dialect Grid', val: tp?.dialects?.map((d: any) => d.dialect.name).join(', ') }
+    ].map((item, idx) => (
+      <div key={idx} className="border-b border-stone-200 pb-2">
+        <span className="block text-[8px] font-black uppercase text-stone-400 font-sans tracking-wider">{item.label}</span>
+        <span className="text-xs font-display text-stone-900 mt-0.5 block">{item.val || '—'}</span>
+      </div>
+    ))}
+  </div>
+
+  {/* TECHNICAL EXECUTION DESCRIPTION FOOTER */}
+  {tp?.skillDescription ? (
+    <div className="bg-amber-50 border-2 border-dashed border-amber-400/80 p-4 rounded-2xl mt-4">
+      <span className="block text-[8px] font-black uppercase text-amber-600 font-sans tracking-wider mb-1">Capabilities & Special Skills</span>
+      <p className="text-xs font-display text-amber-900 leading-relaxed">{tp.skillDescription}</p>
+    </div>
+  ) : (
+    <div className="bg-stone-50 border-2 border-dashed border-stone-200 p-4 rounded-2xl mt-4 text-center">
+      <span className="block text-[8px] font-black uppercase text-stone-400 font-sans tracking-wider mb-1">Capabilities & Special Skills</span>
+      <p className="text-xs font-display text-stone-400">No special skills added yet.</p>
+    </div>
+  )}
+</div>
 
           {/* PHYSICAL ARCHITECTURE FRAMEWORK */}
           <div className="lg:col-span-5 bg-[#3835A4] text-stone-100 rounded-[32px] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#C6007E] flex flex-col justify-between space-y-6">
@@ -358,78 +492,121 @@ const PublicTalentProfile = () => {
           </div>
         </div>
 
-        {/* CHRONOLOGICAL HISTORICAL LOGMAP */}
-        {tp?.careerHistory && tp.careerHistory.length > 0 && (
-          <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-10 shadow-[8px_8px_0px_0px_#3835A4] space-y-8">
-            <div className="flex items-center justify-between border-b-2 border-[#3835A4] pb-4">
-              <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-sans">Historical Placement Grid</h3>
-              {/* <span className="text-stone-300 font-mono text-[10px]">CHRONO_TRACK</span> */}
+       {/* ROW 1: HISTORICAL PLACEMENT + ACADEMIC, SIDE BY SIDE */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+  {/* Historical Placement */}
+  <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-10 shadow-[8px_8px_0px_0px_#3835A4] space-y-8">
+    <div className="flex items-center justify-between border-b-2 border-[#3835A4] pb-4">
+      <h3 className="text-xs font-black tracking-[0.25em] text-[#3835A4] uppercase font-sans">Historical Placement Grid</h3>
+    </div>
+
+    {tp?.careerHistory && tp.careerHistory.length > 0 ? (
+      <div className="grid grid-cols-1 gap-6 relative">
+        {tp.careerHistory.map((ch: any) => (
+          <div key={ch.id} className="bg-[#fdfbf7] border-2 border-[#3835A4] p-6 rounded-2xl relative space-y-2 group transition-transform hover:-translate-y-0.5 hover:bg-white shadow-[4px_4px_0px_0px_#3835A4]">
+            <div className="flex justify-between items-start gap-4">
+              <h4 className="text-sm font-black tracking-tight text-stone-900 uppercase font-display">{ch.title}</h4>
+              <span className="text-[8px] font-sans font-black text-[#C6007E] bg-[#C6007E]/5 border border-[#C6007E]/20 px-2 py-0.5 rounded whitespace-nowrap">
+                {ch.startDate ? new Date(ch.startDate).toLocaleDateString(undefined, { year: 'numeric' }) : ''}
+                {ch.endDate ? ` — ${new Date(ch.endDate).toLocaleDateString(undefined, { year: 'numeric' })}` : ' — Pres'}
+              </span>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-              {tp.careerHistory.map((ch: any) => (
-                <div key={ch.id} className="bg-[#fdfbf7] border-2 border-[#3835A4] p-6 rounded-2xl relative space-y-2 group transition-transform hover:-translate-y-0.5 hover:bg-white shadow-[4px_4px_0px_0px_#3835A4]">
-                  <div className="flex justify-between items-start gap-4">
-                    <h4 className="text-sm font-black tracking-tight text-stone-900 uppercase font-display">{ch.title}</h4>
-                    <span className="text-[8px] font-sans font-black text-[#C6007E] bg-[#C6007E]/5 border border-[#C6007E]/20 px-2 py-0.5 rounded whitespace-nowrap">
-                      {ch.startDate ? new Date(ch.startDate).toLocaleDateString(undefined, { year: 'numeric' }) : ''} 
-                      {ch.endDate ? ` — ${new Date(ch.endDate).toLocaleDateString(undefined, { year: 'numeric' })}` : ' — Pres'}
-                    </span>
-                  </div>
-                  {ch.description && (
-                    <p className="text-xs text-stone-500 font-medium leading-relaxed pt-1 border-t border-dashed border-stone-200">{ch.description}</p>
-                  )}
-                </div>
+            {ch.description && (
+              <p className="text-xs text-stone-500 font-medium leading-relaxed pt-1 border-t border-dashed border-stone-200">{ch.description}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="py-10 text-center bg-stone-50 rounded-2xl border-2 border-dashed border-stone-200">
+        <span className="text-2xl block mb-2">🗂️</span>
+        <p className="text-xs font-sans text-stone-400 uppercase tracking-wider">No career history added yet.</p>
+      </div>
+    )}
+  </div>
+
+  {/* Academic Matrix & Training */}
+  <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 space-y-4 shadow-[6px_6px_0px_0px_#3835A4]">
+    <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+      <span className="text-xl">🎓</span>
+      <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Academic Matrix & Training</h3>
+    </div>
+
+    {tp?.courses && tp.courses.length > 0 ? (
+      <div className="space-y-3">
+        {tp.courses.map((c: any) => (
+          <div key={c.id} className="bg-stone-50 border border-stone-200 p-4 rounded-xl flex justify-between items-center gap-4 hover:border-[#3835A4] transition-colors">
+            <div className="space-y-0.5">
+              <strong className="block text-xs font-display text-stone-900 uppercase tracking-wide">{c.title}</strong>
+              {c.institution && <span className="block text-[10px] font-sans font-bold text-stone-400">{c.institution}</span>}
+            </div>
+            {c.year && <span className="text-xs font-sans font-black bg-[#3835A4] text-white px-2.5 py-1 rounded-md">{c.year}</span>}
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="py-10 text-center bg-stone-50 rounded-2xl border-2 border-dashed border-stone-200">
+        <span className="text-2xl block mb-2">🎓</span>
+        <p className="text-xs font-sans text-stone-400 uppercase tracking-wider">No academic or training details added yet.</p>
+      </div>
+    )}
+  </div>
+
+</div>
+
+{/* ROW 2: ATTRIBUTES, FULL WIDTH */}
+<div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 space-y-6 shadow-[6px_6px_0px_0px_#C6007E]">
+  <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+    <span className="text-xl">📋</span>
+    <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Professional Details
+</h3>
+  </div>
+
+  {tp?.attributes && tp.attributes.filter((a: any) => formatAttributeValue(a.key, a.value) !== null).length > 0 ? (
+    Object.entries(groupAttributesByCategory(tp.attributes)).map(([category, { direct, subGroups }]) => {
+      const Icon = CATEGORY_ICONS_PROFILE[category] || DEFAULT_CATEGORY_ICON_PROFILE;
+      return (
+        <div key={category} className="space-y-4">
+          <div className="flex items-center  gap-2">
+            <Icon size={16} color="#3835A4" />
+            <h4 className="text-xs font-black tracking-widest text-[#3835A4] uppercase font-sans">{category}</h4>
+          </div>
+
+          {direct.length > 0 && (
+            <div className="flex flex-wrap gap-2 pl-6">
+              {direct.map((f, idx) => (
+                <span key={`${f.key}-${idx}`} className="flex items-center gap-1.5 text-xs font-black font-display text-[#3835A4] bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5">
+                  <Icon size={12} color="#3835A4" />
+                  {f.value}
+                </span>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* COMBINED SUB-METRICS FOOTER BLOCKS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Courses Framework Block */}
-          {tp?.courses && tp.courses.length > 0 && (
-            <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 space-y-4 shadow-[6px_6px_0px_0px_#3835A4]">
-              <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                <span className="text-xl">🎓</span>
-                <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Academic Matrix & Training</h3>
-              </div>
-              <div className="space-y-3">
-                {tp.courses.map((c: any) => (
-                  <div key={c.id} className="bg-stone-50 border border-stone-200 p-4 rounded-xl flex justify-between items-center gap-4 hover:border-[#3835A4] transition-colors">
-                    <div className="space-y-0.5">
-                      <strong className="block text-xs font-display text-stone-900  uppercase tracking-wide">{c.title}</strong>
-                      {c.institution && <span className="block text-[10px] font-sans font-bold text-stone-400">{c.institution}</span>}
-                    </div>
-                    {c.year && <span className="text-xs font-sans font-black bg-[#3835A4] text-white px-2.5 py-1 rounded-md">{c.year}</span>}
-                  </div>
+          {Object.entries(subGroups).map(([subGroupLabel, features]) => (
+            <div key={subGroupLabel} className="pl-6 space-y-2">
+              <span className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">{subGroupLabel}</span>
+              <div className="flex flex-wrap gap-2">
+                {features.map((f, idx) => (
+                  <span key={`${f.key}-${idx}`} className="flex items-center gap-1.5 text-xs font-black font-display text-[#3835A4] bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5">
+                    <Icon size={12} color="#3835A4" />
+                    {f.value}
+                  </span>
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Core Spec Attributes Framework Block */}
-          {tp?.attributes && tp.attributes.length > 0 && (
-            <div className="bg-white border-2 border-[#3835A4] rounded-[32px] p-6 sm:p-8 space-y-4 shadow-[6px_6px_0px_0px_#C6007E]">
-              <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                <span className="text-xl">📋</span>
-                <h3 className="text-xs font-black tracking-[0.2em] text-stone-400 uppercase font-sans">Attributes</h3>
-              </div>
-              <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 divide-y divide-stone-200/60 space-y-2.5">
-                {tp.attributes.map((attr: any) => (
-                  <div key={attr.id} className="text-xs flex items-center justify-between pt-2.5 first:pt-0">
-                    <span className="font-black tracking-widest text-stone-400 uppercase text-[9px] font-sans">
-                      {attr.key.replace(/_/g, ' ')}
-                    </span>
-                    <span className="font-black font-display text-[#3835A4] tracking-tight bg-white px-2 py-0.5 border border-stone-200 rounded">{attr.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+          ))}
         </div>
+      );
+    })
+  ) : (
+    <div className="py-10 text-center bg-stone-50 rounded-2xl border-2 border-dashed border-stone-200">
+      <span className="text-2xl block mb-2">📋</span>
+      <p className="text-xs font-sans text-stone-400 uppercase tracking-wider">No professional attributes added yet.</p>
+    </div>
+  )}
+</div>
 
       </div>
     </div>

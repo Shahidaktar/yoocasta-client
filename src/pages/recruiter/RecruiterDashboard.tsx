@@ -1,0 +1,122 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
+import { getRecruiterProfile } from '../../api/recruiter.api';
+
+const RecruiterDashboard = () => {
+  const navigate = useNavigate();
+  const { user, updateUser } = useAuthStore();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+    getRecruiterProfile()
+      .then(res => {
+        const data = res.data.data;
+        setProfile(data);
+        
+        // Sync Admin Verification status from DB to Zustand
+        if (data.user?.isVerified !== user?.isVerified) {
+          updateUser({ isVerified: data.user.isVerified });
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[10px] font-black tracking-widest text-[#3835A4]/40 uppercase animate-pulse">
+          Initializing Hub Control Matrix...
+        </div>
+      </div>
+    );
+  }
+
+  // Use Contact Person's first name if available, otherwise fallback to Company Name
+  const displayName = profile?.contactPerson?.split(' ')[0] || profile?.companyName?.split(' ')[0] || 'User';
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-12 space-y-10">
+      
+      {/* Editorial Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-[#3835A4]/10 pb-8">
+        <div className="flex items-center gap-5">
+          {profile?.logo ? (
+            <img 
+              src={profile.logo} 
+              alt="Company Logo" 
+              className="w-16 h-16 rounded-2xl object-cover border border-[#3835A4]/20" 
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-[#3835A4] text-white flex items-center justify-center font-black text-xl select-none">
+              {profile?.companyName?.[0] || 'C'}
+            </div>
+          )}
+          <div>
+            <h2 className="text-2xl font-black tracking-tight">
+              <span className="text-[#3835A4]">Welcome back, </span>
+              <span className="text-[#C6007E]">{displayName}</span>
+            </h2>
+            <p className="text-xs font-mono tracking-wider text-[#3835A4]/50 mt-0.5"> {profile?.companyType || 'Recruiter'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Critical Core Status Warning Messages */}
+            {/* Critical Core Status Warning Messages */}
+      <div className="space-y-4">
+        {/* Profile NOT Verified by Admin Banner */}
+        {!user?.isVerified && (
+          <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fadeIn">
+            <div className="space-y-1">
+              <div className="text-[10px] font-black tracking-widest text-amber-700 uppercase flex items-center gap-2">
+                <span>⏳</span> Profile Authorization Pending
+              </div>
+              <p className="text-xs font-medium text-amber-700/80 max-w-2xl">
+                Your corporate identity is currently under review by the system administration team. Certain features, such as posting jobs, will be restricted until authorization is complete.
+              </p>
+            </div>
+            <div className="md:self-center border border-amber-300 bg-amber-100 text-amber-800 font-black text-[10px] tracking-widest uppercase px-5 py-3 rounded-xl whitespace-nowrap">
+              Under Review
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Grid: Control Core Dashboard Framework */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        {[
+          { to: "/dashboard/recruiter/profile-setup", icon: "🏢", title: "Company Profile", desc: "Verify or restructure systemic corporate identity attributes.", action: "Inspect Blueprint →" },
+          { to: "/dashboard/recruiter/jobs", icon: "🎬", title: "Manage Jobs", desc: "Browse dynamic casting indices and project placements.", action: "Search Ledger →" },
+          { to: "/dashboard/recruiter/cast-bags", icon: "🎒", title: "Cast Bag", desc: "Curate and share talent syndication folders.", action: "Manage Collections →" },
+          { to: "/dashboard/recruiter/favourites", icon: "❤️", title: "Favourite List", desc: "Access saved talent profiles and shortlists.", action: "View Archives →" },
+          { to: "/dashboard/recruiter/jobs/new", icon: "➕", title: "Post a New Job", desc: "Deploy new casting calls and auditions to the network.", action: "Create Deployment →" },
+          { to: "/dashboard/recruiter/invitations", icon: "📩", title: "Sent Invitations", desc: "Track external syndication requests sent to talents.", action: "Track Vectors →" },
+        ].map((item, idx) => (
+          <Link 
+            key={idx}
+            to={item.to} 
+            className="group border border-[#3835A4]/10 bg-white hover:border-[#3835A4] p-6 rounded-2xl flex flex-col justify-between aspect-[4/3] transition-all duration-300 hover:shadow-sm"
+          >
+            <div className="space-y-1.5">
+              <span className="text-xl group-hover:scale-110 transition-transform duration-300 block origin-left">{item.icon}</span>
+              <h3 className="text-sm font-black tracking-tight text-[#3835A4]">{item.title}</h3>
+              <p className="text-xs text-[#3835A4]/50 font-medium">{item.desc}</p>
+            </div>
+            <span className="text-[10px] font-black tracking-widest uppercase text-[#3835A4]/40 group-hover:text-[#3835A4] group-hover:translate-x-1 transition-all duration-150 block mt-4">
+              {item.action}
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Real-time Metric Manifest / Company Summary */}
+      
+    </div>
+  );
+};
+
+export default RecruiterDashboard;

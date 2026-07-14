@@ -18,10 +18,11 @@ import BrowseTalents from './pages/talent/BrowseTalents';
 import Home from './pages/Home';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import RecruiterProfileSetup from './pages/recruiter/RecruiterProfileSetup';
+import RecruiterDashboard from './pages/recruiter/RecruiterDashboard';
 
 // Placeholder dashboard pages (we'll build these next)
 
-const RecruiterDashboard = () => <div><h1>Recruiter Dashboard</h1></div>;
 const Unauthorized = () => <div><h1>Unauthorized</h1></div>;
 
 function App() {
@@ -53,8 +54,9 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['RECRUITER']} />}>
-            <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
-          </Route>
+  <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
+  <Route path="/dashboard/recruiter/profile-setup" element={<RecruiterProfileSetup />} /> {/* ADD THIS */}
+</Route>
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
