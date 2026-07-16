@@ -93,7 +93,7 @@ const RecruiterDashboard = () => {
           { to: "/dashboard/recruiter/jobs", icon: "🎬", title: "Manage Jobs", desc: "Browse dynamic casting indices and project placements.", action: "Search Ledger →" },
           { to: "/dashboard/recruiter/cast-bags", icon: "🎒", title: "Cast Bag", desc: "Curate and share talent syndication folders.", action: "Manage Collections →" },
           { to: "/dashboard/recruiter/favourites", icon: "❤️", title: "Favourite List", desc: "Access saved talent profiles and shortlists.", action: "View Archives →" },
-          { to: "/dashboard/recruiter/jobs/new", icon: "➕", title: "Post a New Job", desc: "Deploy new casting calls and auditions to the network.", action: "Create Deployment →" },
+          { to: "/dashboard/recruiter/post-job", icon: "➕", title: "Post a New Job", desc: "Deploy new casting calls and auditions to the network.", action: "Create Deployment →" },
           { to: "/dashboard/recruiter/invitations", icon: "📩", title: "Sent Invitations", desc: "Track external syndication requests sent to talents.", action: "Track Vectors →" },
         ].map((item, idx) => (
           <Link 

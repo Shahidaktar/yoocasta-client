@@ -20,6 +20,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import RecruiterProfileSetup from './pages/recruiter/RecruiterProfileSetup';
 import RecruiterDashboard from './pages/recruiter/RecruiterDashboard';
+import PostJob from './pages/recruiter/post-job/PostJob';
+import ManageJobs from './pages/recruiter/ManageJobs';
 
 // Placeholder dashboard pages (we'll build these next)
 
@@ -54,9 +56,11 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['RECRUITER']} />}>
-  <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
-  <Route path="/dashboard/recruiter/profile-setup" element={<RecruiterProfileSetup />} /> {/* ADD THIS */}
-</Route>
+            <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
+            <Route path="/dashboard/recruiter/profile-setup" element={<RecruiterProfileSetup />} /> 
+            <Route path="/dashboard/recruiter/post-job" element={<PostJob />} />
+            <Route path="/dashboard/recruiter/jobs" element={<ManageJobs />} />
+          </Route>
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
