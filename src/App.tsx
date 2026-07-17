@@ -22,6 +22,8 @@ import RecruiterProfileSetup from './pages/recruiter/RecruiterProfileSetup';
 import RecruiterDashboard from './pages/recruiter/RecruiterDashboard';
 import PostJob from './pages/recruiter/post-job/PostJob';
 import ManageJobs from './pages/recruiter/ManageJobs';
+import PublicJobPage from './pages/jobs/PublicJobPage';
+import BrowseJobs from './pages/jobs/BrowseJobs';
 
 // Placeholder dashboard pages (we'll build these next)
 
@@ -47,6 +49,8 @@ function App() {
 
           <Route path="/talent/:username" element={<PublicTalentProfile />} />
           <Route path="/browse-talents" element={<BrowseTalents />} />
+          <Route path="/browse-jobs" element={<BrowseJobs />} />
+          <Route path="/jobs/:jobId" element={<PublicJobPage />} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute allowedRoles={['TALENT']} />}>

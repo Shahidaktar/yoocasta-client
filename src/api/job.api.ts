@@ -9,3 +9,12 @@ export const deleteJob = (jobId: string) => api.delete(`/jobs/${jobId}`);
 export const addRole = (jobId: string, data: any) => api.post(`/jobs/${jobId}/roles`, data);
 export const updateRole = (jobId: string, roleId: string, data: any) => api.put(`/jobs/${jobId}/roles/${roleId}`, data);
 export const deleteRole = (jobId: string, roleId: string) => api.delete(`/jobs/${jobId}/roles/${roleId}`);
+export const getPublicJobById = (jobId: string) => api.get(`/jobs/public/${jobId}`);
+export const getPublicJobs = (params: any) => {
+  const serialized: any = {};
+  for (const [key, val] of Object.entries(params)) {
+    if (val === undefined || val === null || val === '') continue;
+    serialized[key] = Array.isArray(val) ? val.join(',') : val;
+  }
+  return api.get('/jobs/public', { params: serialized });
+};

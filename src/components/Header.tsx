@@ -84,7 +84,7 @@ export default function Header({
             Talent Pool
             <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-[#C6007E] animate-pulse"></span>
           </a>
-          <a href="/" className="hover:text-[#3835a4] transition-colors">
+          <a href="/browse-jobs" className="hover:text-[#3835a4] transition-colors">
             Casting Calls
           </a>
           <a href="/" className="hover:text-[#3835a4] transition-colors">Our Work</a>
